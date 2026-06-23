@@ -78,10 +78,10 @@ if st.button("🌸 Predict Species"):
     st.info(
         f"""
         📌 입력값 요약  
-        - Sepal Length: {sl}  
-        - Sepal Width: {sw}  
-        - Petal Length: {pl}  
-        - Petal Width: {pw}
+        - 꽃받침 길이(Sepal Length): {sl}  
+        - 꽃받침 너비(Sepal Width): {sw}  
+        - 꽃잎 길이(Petal Length): {pl}  
+        - 꽃잎 너비(Petal Width): {pw}
         """
     )
 
