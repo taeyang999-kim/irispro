@@ -1,5 +1,5 @@
 import streamlit as st
-import random
+import pandas as pd
 
 # 1. DB (발표용 Mock DB)
 class Database:
@@ -8,25 +8,24 @@ class Database:
 
     def save_iris(self, sl, sw, pl, pw, result):
         self.data.append({
-            "sl": sl,
-            "sw": sw,
-            "pl": pl,
-            "pw": pw,
-            "result": result
+            "Sepal Length": sl,
+            "Sepal Width": sw,
+            "Petal Length": pl,
+            "Petal Width": pw,
+            "Result": result
         })
 
     def get_result_stats(self):
         stats = {"Setosa": 0, "Versicolor": 0, "Virginica": 0}
         for d in self.data:
-            stats[d["result"]] += 1
+            stats[d["Result"]] += 1
         return stats
 
 
-# 2. ML 모델 (발표용 간단 버전)
+# 2. ML 모델 (발표용 규칙 기반)
 def predict_iris(features):
     sl, sw, pl, pw = features
 
-    # 아주 단순한 규칙 기반 (발표용 설명 가능)
     if pl < 2:
         return "Setosa"
     elif pl < 5:
@@ -38,7 +37,11 @@ def predict_iris(features):
 # 3. 앱 초기화
 db = Database()
 
-st.set_page_config(page_title="Iris ML Service", page_icon="🌸", layout="centered")
+st.set_page_config(
+    page_title="Iris ML Service",
+    page_icon="🌸",
+    layout="centered"
+)
 
 st.title("🌸 Iris Flower Classification Service")
 st.caption("Machine Learning 기반 꽃 종류 예측 웹 애플리케이션")
@@ -61,6 +64,7 @@ with col2:
 
 st.markdown("---")
 
+
 # 5. 예측
 if st.button("🌸 Predict Species"):
 
@@ -68,6 +72,8 @@ if st.button("🌸 Predict Species"):
     db.save_iris(sl, sw, pl, pw, result)
 
     st.success(f"🌸 Prediction Result: **{result}**")
+
+    st.metric(label="Predicted Class", value=result)
 
     st.info(
         f"""
@@ -78,7 +84,6 @@ if st.button("🌸 Predict Species"):
         - Petal Width: {pw}
         """
     )
-
 
 st.markdown("---")
 
@@ -94,14 +99,32 @@ else:
     st.warning("아직 예측 데이터가 없습니다.")
 
 
-# 7. 설명 (발표용 포인트)
+# 7. 최근 기록 (🔥 추가 기능)
+st.subheader("📋 Recent Predictions")
+
+if len(db.data) > 0:
+    df = pd.DataFrame(db.data)
+    st.dataframe(df.tail(10))
+else:
+    st.info("아직 저장된 데이터가 없습니다.")
+
+
+# 8. 초기화 버튼 (🔥 추가 기능)
+if st.button("🧹 Reset All Data"):
+    db.data.clear()
+    st.success("모든 데이터가 초기화되었습니다.")
+    st.rerun()
+
+
+# 9. 설명 (발표용)
 with st.expander("📘 프로젝트 설명 보기"):
     st.write("""
     이 프로젝트는 머신러닝 기반 Iris 꽃 분류 서비스입니다.
 
-    - 사용자가 꽃의 4가지 특징을 입력하면
-    - 머신러닝 모델이 꽃의 종류를 예측합니다.
-    - 예측 결과는 저장되고 통계로 시각화됩니다.
+    ✔ 사용자가 꽃의 4가지 특징을 입력하면  
+    ✔ 머신러닝 모델이 꽃 종류를 예측합니다  
+    ✔ 예측 결과는 저장되어 통계로 시각화됩니다  
+    ✔ 최근 기록도 확인할 수 있는 웹 서비스입니다  
 
-    👉 Streamlit을 이용해 웹 서비스 형태로 구현했습니다.
+    👉 Streamlit을 이용한 머신러닝 서비스 구현 프로젝트입니다.
     """)
