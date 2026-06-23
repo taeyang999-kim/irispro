@@ -10,10 +10,10 @@ if "data" not in st.session_state:
 class Database:
     def save_iris(self, sl, sw, pl, pw, result):
         st.session_state.data.append({
-            "Sepal Length": sl,
-            "Sepal Width": sw,
-            "Petal Length": pl,
-            "Petal Width": pw,
+            "꽃받침의 길이": sl,
+            "꽃받침의 너비": sw,
+            "꽃잎의 길이": pl,
+            "꽃잎의 너비": pw,
             "Result": result
         })
 
