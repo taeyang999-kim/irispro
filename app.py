@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+import joblib
 
 # 1. SESSION STATE DB (중요)
 if "data" not in st.session_state:
@@ -31,17 +32,19 @@ class Database:
 
 db = Database()
 
+model = joblib.load("iris_model.pkl")
+
 
 # 2. ML MODEL (RULE BASED)
-def predict_iris(features):
-    sl, sw, pl, pw = features
+#def predict_iris(features):
+#    sl, sw, pl, pw = features
 
-    if pl < 2:
-        return "Setosa"
-    elif pl < 5:
-        return "Versicolor"
-    else:
-        return "Virginica"
+#    if pl < 2:
+#        return "Setosa"
+#    elif pl < 5:
+#        return "Versicolor"
+#    else:
+#        return "Virginica"
 
 
 # 3. PAGE CONFIG (최상단 안전)
@@ -70,14 +73,30 @@ with col2:
     pl = st.number_input("Petal Length", value=1.5)
     pw = st.number_input("Petal Width", value=0.2)
 
+#if st.button("🌸 Predict Species"):
+
+#    result = predict_iris([sl, sw, pl, pw])
+#    db.save_iris(sl, sw, pl, pw, result)
+
+#    st.success(f"Prediction: {result}")
+#    st.metric("Predicted Class", result)
+
 if st.button("🌸 Predict Species"):
 
-    result = predict_iris([sl, sw, pl, pw])
+    prediction = model.predict([[sl, sw, pl, pw]])[0]
+
+    species = {
+        0: "Setosa",
+        1: "Versicolor",
+        2: "Virginica"
+    }
+
+    result = species[prediction]
+
     db.save_iris(sl, sw, pl, pw, result)
 
     st.success(f"Prediction: {result}")
     st.metric("Predicted Class", result)
-
 
 st.markdown("---")
 
