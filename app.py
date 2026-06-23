@@ -1,43 +1,107 @@
 import streamlit as st
+import random
 
-# 1. 기존 app.db.database.py에 있던 클래스를 내장시킵니다.
+# 1. DB (발표용 Mock DB)
 class Database:
     def __init__(self):
-        # 데이터베이스 초기화 로직 (필요시 작성)
-        pass
-        
+        self.data = []
+
     def save_iris(self, sl, sw, pl, pw, result):
-        # 데이터베이스 저장 로직 (필요시 작성)
-        pass
-        
+        self.data.append({
+            "sl": sl,
+            "sw": sw,
+            "pl": pl,
+            "pw": pw,
+            "result": result
+        })
+
     def get_result_stats(self):
-        # Streamlit 차트가 정상 작동하도록 임시/기본 통계 데이터를 리턴합니다.
-        # 나중에 실제 DB 데이터로 연결하시면 됩니다.
-        return [("Setosa", 12), ("Versicolor", 18), ("Virginica", 9)]
+        stats = {"Setosa": 0, "Versicolor": 0, "Virginica": 0}
+        for d in self.data:
+            stats[d["result"]] += 1
+        return stats
 
-# 2. 기존 app.ml.predictor.py에 있던 함수를 내장시킵니다.
+
+# 2. ML 모델 (발표용 간단 버전)
 def predict_iris(features):
-    # 머신러닝 예측 모델이 들어갈 자리입니다.
-    # 우선 화면 테스트를 위해 기본값으로 "Setosa"를 반환하게 만듭니다.
-    return "Setosa"
+    sl, sw, pl, pw = features
+
+    # 아주 단순한 규칙 기반 (발표용 설명 가능)
+    if pl < 2:
+        return "Setosa"
+    elif pl < 5:
+        return "Versicolor"
+    else:
+        return "Virginica"
 
 
-# 3. Streamlit 웹 인터페이스 및 실행 로직
+# 3. 앱 초기화
 db = Database()
 
-st.title("🌸 Iris Classifier")
+st.set_page_config(page_title="Iris ML Service", page_icon="🌸", layout="centered")
 
-sl = st.number_input("Sepal Length", 5.0)
-sw = st.number_input("Sepal Width", 3.0)
-pl = st.number_input("Petal Length", 1.5)
-pw = st.number_input("Petal Width", 0.2)
+st.title("🌸 Iris Flower Classification Service")
+st.caption("Machine Learning 기반 꽃 종류 예측 웹 애플리케이션")
 
-if st.button("Predict"):
+st.markdown("---")
+
+
+# 4. 입력 UI
+st.subheader("📥 꽃 정보 입력")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    sl = st.number_input("Sepal Length", value=5.0)
+    sw = st.number_input("Sepal Width", value=3.0)
+
+with col2:
+    pl = st.number_input("Petal Length", value=1.5)
+    pw = st.number_input("Petal Width", value=0.2)
+
+st.markdown("---")
+
+# 5. 예측
+if st.button("🌸 Predict Species"):
+
     result = predict_iris([sl, sw, pl, pw])
     db.save_iris(sl, sw, pl, pw, result)
-    st.success(result)
-    
-    
+
+    st.success(f"🌸 Prediction Result: **{result}**")
+
+    st.info(
+        f"""
+        📌 입력값 요약  
+        - Sepal Length: {sl}  
+        - Sepal Width: {sw}  
+        - Petal Length: {pl}  
+        - Petal Width: {pw}
+        """
+    )
+
+
+st.markdown("---")
+
+
+# 6. 통계 그래프
+st.subheader("📊 Prediction Statistics")
 
 stats = db.get_result_stats()
-st.bar_chart(dict(stats))
+
+if sum(stats.values()) > 0:
+    st.bar_chart(stats)
+else:
+    st.warning("아직 예측 데이터가 없습니다.")
+
+
+# 7. 설명 (발표용 포인트)
+with st.expander("📘 프로젝트 설명 보기"):
+    st.write("""
+    이 프로젝트는 머신러닝 기반 Iris 꽃 분류 서비스입니다.
+
+    - 사용자가 꽃의 4가지 특징을 입력하면
+    - 머신러닝 모델이 꽃의 종류를 예측합니다.
+    - 예측 결과는 저장되고 통계로 시각화됩니다.
+
+    👉 Streamlit을 이용해 웹 서비스 형태로 구현했습니다.
+    """)
